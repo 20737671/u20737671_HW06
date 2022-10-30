@@ -1,0 +1,141 @@
+﻿@model PagedList.IPagedList<Homework_06.Models.order_items>
+
+@{
+    ViewBag.Title = "Index";
+}
+
+
+@using PagedList.Mvc;
+@using PagedList;
+
+
+<h2>Orders</h2>
+
+
+
+<form asp-action="Index" method="get">
+
+
+    <label>
+        Search by Date:
+        <input type="date" name="DateString" placeholder="Search" value="@ViewData["DateFilter"]" aria-label="Search" required pattern="\d{4}-\d{2}-\d{2}" />
+        <span class="validity"></span>
+        <button class="btn btn-primary" type="submit" value="Search">Search</button>
+    </label>
+
+
+    @*@(Html.Kendo().DatePickerFor(x => x.myStartDate)
+        .HtmlAttributes( new {id="startDate", style = "width:252px;"}))*@
+
+
+</form>
+
+
+
+@{
+    var asbwerk = Model.GroupBy(x => x.order_id).Select(x => new { order_id = x.Key, product = x });
+
+    var werktog = Model.GroupBy(x => x.order).Select(x => new { order_date = x.Key, product = x }).ToList();
+}
+
+
+
+<div>
+    @foreach (var order_items in asbwerk)
+    {
+
+
+
+
+
+        <table class="table">
+            <tr>
+
+                <th>
+                    @Html.DisplayNameFor(model => model.First().product.product_name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().list_price)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.First().quantity)
+                </th>
+                <td>
+                    <b>Total</b>
+                </td>
+
+
+
+                <th></th>
+            </tr>
+
+
+            @{
+
+                decimal total = 0;
+                decimal Grandtotal = 0;
+
+
+
+
+            }
+
+
+
+            <p>Order @order_items.order_id -  </p>
+            @foreach (var item in order_items.product)
+
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.product.product_name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.list_price)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.quantity)
+                    </td>
+                    <td>
+                        @{
+
+                            total = item.product.list_price * item.quantity;
+                            Grandtotal = total + Grandtotal;
+
+
+                        }
+
+
+
+                        @total
+                    </td>
+
+
+                </tr>
+            }
+            <tr>
+                <td>
+                </td>
+                <td>
+                </td>
+                <td>
+                    <p><I>Grand Total:</I></p>
+                </td>
+                <td>
+                    <p><I>@Grandtotal</I></p>
+                </td>
+            </tr>
+        </table>
+
+    }
+</div>
+
+
+
+
+
+
+
+
+
+    @Html.PagedListPager(Model, i => Url.Action("Index", "order_items", new { i, DateString = Request.QueryString["DateString"] }))
